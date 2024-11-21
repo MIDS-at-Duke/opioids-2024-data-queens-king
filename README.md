@@ -2,3 +2,4 @@
 
 Opioid Shipment Data Cleaning Box Link: https://duke.box.com/s/kzlnydhyaomzu5fz40pgtcr12cdd07h6 [Sign in with Duke email]
 
+US Vital Statistics Mortality Data Box link: https://duke.box.com/s/rbg06c92tng55mwu6613c15psw5lzca7 [Sign in with Duke email]
