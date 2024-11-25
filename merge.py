@@ -1,18 +1,19 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from sklearn.metrics import mean_squared_error, r2_score
+from bs4 import BeautifulSoup
+from sklearn.ensemble import RandomForestRegressor
+import numpy as np
+import dotenv
+from sklearn.model_selection import train_test_split
+import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 import os
 import dotenv
-import pandas as pd
-import os
-from scipy.optimize import curve_fit
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
+import shutil
 
-# Importing FIPS
+
 url = "https://en.wikipedia.org/wiki/List_of_United_States_FIPS_codes_by_county"
 
 
@@ -53,7 +54,6 @@ county_fips_df.to_csv("county_fips.csv", index=False)
 print(county_fips_df.head(10))
 
 
-# Adjusting FIPS
 first_2 = ["53", "01", "13", "23", "08", "12", "40", "41"]
 
 
@@ -83,19 +83,21 @@ fips_df = fips_df.rename(columns={"FIPS Code": "County_FIPS", "County Name": "Co
 
 print(len(fips_df))
 
+# Cell
 
 # IMporting Educaiton, Poverty, Unemployment
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 url = "https://raw.githubusercontent.com/MIDS-at-Duke/opioids-2024-data-queens-king/main/data/USDA_education_poverty_unemployment_income.parquet"
 headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 response = requests.get(url, headers=headers)
-epu_df = pd.read_parquet("USDA_education_poverty_unemployment_income.parquet")
+epu_df = pd.read_parquet("data/USDA_education_poverty_unemployment_income.parquet")
 epu_df["FIPS"] = epu_df["FIPS"].apply(lambda x: str(x).zfill(5))
 epu_df["YR"].value_counts()
 desired_years = ["2008-2012", "2015", "2014", "2017", "2016", "2021"]
 epu_df1 = epu_df[epu_df["YR"].isin(desired_years)]
 epu_df1.sample(5)
 
+# Cell
 
 # This code expands the '2008-2012' lines into individual lines for 2008, 2009, 2010, 2011. 2012
 expanded_rows = []
@@ -113,34 +115,30 @@ epu_df2.reset_index(drop=True, inplace=True)
 print(epu_df2.head(30))
 
 
-# Define the path to the Parquet file in the data folder
+import pandas as pd
+import os
+
+
 file_path = os.path.join("data", "USDA_population2021.parquet")
 
-# Attempt to load the Parquet file from the data folder
+
 try:
     pop = pd.read_parquet(file_path)
 
-    # Process the DataFrame
-    # Ensure FIPS codes have leading zeros
     pop["FIPS"] = pop["FIPS"].apply(lambda x: str(x).zfill(5))
-    # Rename the FIPS column
+
     pop = pop.rename(columns={"FIPS": "County_FIPS"})
 
-    # Print the first 5 rows
     print(pop.head(5))
 except Exception as e:
     print("Error reading Parquet file:", e)
 
-
-# Merging FIPS on pop
 
 fips_pop = pd.merge(
     fips_df, pop, how="left", on=["County_FIPS"], indicator=True, validate="1:1"
 )
 
 missing_values = fips_pop.isna().sum()
-
-# print(f"By computing the total missing values in fips_pop after the merge the following is obtained:{missing_values}")
 
 
 fips_pop.head(5)
@@ -165,34 +163,28 @@ fips_pop = fips_pop.rename(
 )
 
 fips_pop["pop_merge_indicator"].value_counts()
-# print(f"By computing the total missing values in fips_pop after the merge the following is obtained:{missing_values}")
 
 
-# Define the path to the Parquet file in the data folder
 file_path = os.path.join("data", "USDA_poverty2021.parquet")
 
-# Attempt to load the Parquet file from the data folder
+
 try:
     pov = pd.read_parquet(file_path)
 
-    # Process the DataFrame
-    # Ensure FIPS codes have leading zeros
     pov["FIPS"] = pov["FIPS"].apply(lambda x: str(x).zfill(5))
-    # Rename the FIPS column
+
     pov = pov.rename(columns={"FIPS": "County_FIPS"})
-    # Select and rename specific columns
+
     pov = pov[["County_FIPS", "All people in poverty (2021) Percent"]]
     pov = pov.rename(
         columns={"All people in poverty (2021) Percent": "pov_poverty_rate_percent"}
     )
 
-    # Print the first 5 rows
     print(pov.head(5))
 except Exception as e:
     print("Error reading Parquet file:", e)
 
 
-# Merging FIPS_POP on POV
 fpp = pd.merge(
     fips_pop, pov, how="left", on=["County_FIPS"], indicator=True, validate="1:1"
 )
@@ -206,7 +198,7 @@ fpp.head(20)
 
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-url_4 = "https://raw.githubusercontent.com/MIDS-at-Duke/opioids-2024-data-queens-king/main/data/USDA_medIncome2021.parquet"
+url_4 = "https://raw.githubusercontent.com/MIDS-at-Duke/opioids-2024-data-queens-king/main/USDA_medIncome2021.parquet"
 headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 response = requests.get(url_4, headers=headers)
 with open("USDA_medIncome2021.parquet", "wb") as file:
@@ -226,7 +218,6 @@ minc = minc.rename(
 
 minc.head(5)
 
-
 fppi = pd.merge(
     fpp, minc, how="left", on=["County_FIPS"], indicator=True, validate="1:1"
 )
@@ -237,7 +228,6 @@ fppi = fppi.rename(columns={"_merge": "minc_merge_indicator"})
 fppi["pop_merge_indicator"].value_counts()
 
 
-# Importing Opioid Shipment Data
 file_path = "data/opioid_shipment_WA_FL_andconstants.parquet"
 
 
@@ -276,6 +266,7 @@ print(
 
 opioid["year"].value_counts()
 
+# Cell
 
 opioid = opioid.rename(
     columns={
@@ -292,6 +283,7 @@ opioid_unique_counties = opioid[
     ["state_county", "opioid_State", "opioid_County"]
 ].drop_duplicates()
 
+# Cell
 
 county_adj_dict = {
     "DE KALB": "DEKALB",
@@ -319,7 +311,6 @@ left_only = fpp_opioid[fpp_opioid["opioid_merge_indicator"] == "left_only"]
 print(len(fpp_opioid))
 
 
-# Dropping Counties that did not record opioid shipments
 des_yr = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015]
 
 fpp_opioid = fpp_opioid[fpp_opioid["opioid_merge_indicator"] == "both"]
@@ -329,18 +320,15 @@ fpp_opioid["FIPS|YEAR"] = (
 )
 fpp_opioid = fpp_opioid[fpp_opioid["opioid_YEAR"].isin(des_yr)]
 
-# Define the path to the Parquet file in the data folder
 file_path = os.path.join("data", "mortality_data.parquet")
 
-# Define the desired years
+
 des_yr = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015]
 
-# Attempt to load the Parquet file from the data folder
+
 try:
     mort = pd.read_parquet(file_path)
 
-    # Process the DataFrame
-    # Select and rename columns
     mort = mort[["county_code", "year", "deaths"]]
     mort = mort.rename(
         columns={
@@ -350,15 +338,12 @@ try:
         }
     )
 
-    # Create the 'FIPS|YEAR' column
     mort["FIPS|YEAR"] = (
         mort["County_FIPS"].astype("str") + "|" + mort["mort_year"].astype("str")
     )
 
-    # Filter rows for the desired years
     mort = mort[mort["mort_year"].isin(des_yr)]
 
-    # Print the first 5 rows
     print(mort.head(5))
 except Exception as e:
     print("Error reading Parquet file:", e)
@@ -413,7 +398,6 @@ summary_tb["%_missing_mortality"] = (
 ).astype("int").astype("str") + "%"
 
 print(summary_tb)
-
 
 # Step 1: Clean population data and ensure numeric
 if "pop_Population" in merged_dataset.columns:
@@ -495,6 +479,7 @@ plt.tick_params(colors="#262626", labelsize=12)
 plt.tight_layout()
 plt.show()
 
+
 # Filter dataset for overdose counties and missing mortality match
 overdose_counties = merged_dataset[
     merged_dataset["mort_merge_indicator"] == "both"
@@ -561,9 +546,11 @@ no_mort_match["predicted_overdose_deaths_stochastic"] = (
 
 no_mort_match.head(5)
 
+# Cell
 
 no_mort_match = no_mort_match[["FIPS|YEAR", "predicted_overdose_deaths_stochastic"]]
 
+# Cell
 
 final_dataset = pd.merge(
     merged_dataset,
@@ -577,6 +564,7 @@ final_dataset = pd.merge(
 
 final_dataset["_merge"].value_counts()
 
+# Cell
 
 final_dataset["mort_overdose_deaths"] = final_dataset["mort_overdose_deaths"].fillna(
     final_dataset["predicted_overdose_deaths_stochastic"]
@@ -670,6 +658,7 @@ plt.tick_params(colors="#262626", labelsize=12)
 plt.tight_layout()
 plt.show()
 
+
 # Grouping populations into bins for the histogram
 pop_data = np.array(final_dataset["pop_log_population"])
 bin_edges = np.histogram_bin_edges(pop_data, bins="auto")
@@ -734,7 +723,24 @@ plt.tick_params(colors="#262626", labelsize=12)
 plt.tight_layout()
 plt.show()
 
+# AFTER READING THE HISTOGRAM FOR LOG-POP AND UNIQUE COUNTIES WE DETERMINED THE THRESHOLD FOR SMALL COUNTIES BEING 8.5
 
 final_dataset = final_dataset[final_dataset["pop_log_population"] >= 8.5]
+final_dataset["grams_morphine_per_cap"] = final_dataset[
+    "opioid_morphine_equivalent_g"
+].astype("float") / final_dataset["pop_Population"].astype("int")
 
-print(final_dataset.head(5))
+final_dataset["overdose_deaths_per_cap"] = final_dataset["mort_overdose_deaths"].astype(
+    "int"
+) / final_dataset["pop_Population"].astype("int")
+
+
+# Ensure the `data` folder exists
+destination_folder = "data"
+os.makedirs(destination_folder, exist_ok=True)
+
+# Save the final dataset directly to the `data` folder
+destination_path = os.path.join(destination_folder, "final_dataset.csv")
+final_dataset.to_csv(destination_path, index=False)
+
+print(f"Final dataset has been saved to '{destination_path}'")

@@ -18,34 +18,12 @@ def get_poverty_data(filepath="USDA_data/Poverty.csv"):
 
 # Population Data
 def get_population_data(filepath="USDA_data/Population.csv"):
-    population=pd.read_csv(filepath)
-    population_filted=population[population["State"].isin(["FL", "WA", "OR", "GA", "OK", "AL", "CO", "ME"])]
-    population_filted_melt = population_filted.melt(
-        id_vars=['FIPStxt', 'State', 'Area_Name'],
-        var_name='Metric',
-        value_name='value'
-    )
-    population_filted_melt['YR'] = population_filted_melt['Metric'].str[-4:]
-    population_filted_melt['Metric'] = population_filted_melt['Metric'].str[:-5]
-    population_filted_pivot = population_filted_melt.pivot(
-        index=['FIPStxt', 'State', 'Area_Name', 'YR'],  # Identifiers for rows
-        columns='Metric',                              # Column headers
-        values='value'                                 # Values to populate
-    )
-
-    population_filted_pivot.reset_index(inplace=True)
+    population=pd.read_csv("USDA_data/Population.csv")
+    population.rename(columns={'FIPS*': 'FIPS'}, inplace=True)
+    population=population[["FIPS", "County name","Pop. 2010"]]
+    population["YR"]=2010
     
-    population2021_data=population_filted_pivot[population_filted_pivot["YR"]=="2021"]
-    population2021_data = population2021_data[["FIPStxt", "State", "Area_Name", "YR", "POP_ESTIMATE"]]
-    population2021_data.rename(columns={'FIPStxt': 'FIPS'}, inplace=True)
-    population2021_data.rename(columns={'Area_Name': 'Name'}, inplace=True)
-    population2021_data.rename(columns={'POP_ESTIMATE': 'Estimated Population'}, inplace=True)
-    # population_data.rename(columns={'N_POP_CHG': 'Net Population Change'}, inplace=True)
-    # population_data.rename(columns={'R_NATURAL_CHG': 'Rate of Poulation Change(birth minus deaths)'}, inplace=True)
-    population2021_data = population2021_data.dropna(subset=["Estimated Population"])
-    population2021_data
-
-    return population2021_data
+    return population
 
 
 #Unemployment data
@@ -85,7 +63,7 @@ def get_income_data(filepath="USDA_data/Unemployment.csv"):
 
 def get_USDA_data():
     poverty_data=get_poverty_data(filepath="USDA_data/Poverty.csv")
-    population2021_data=get_population_data(filepath="USDA_data/Population.csv")
+    population2010_data=get_population_data(filepath="USDA_data/Population.csv")
     unemployment_all_data=get_unemployment_data(filepath="USDA_data/Unemployment.csv")
     med_income_data=get_income_data(filepath="USDA_data/Unemployment.csv")
     unemployment_all_data['YR'] = unemployment_all_data['YR'].astype('str')
@@ -96,9 +74,10 @@ def get_USDA_data():
     # poverty_data.to_parquet("data/USDA_poverty2021.parquet", index=False)
     # med_income_data.to_parquet("data/USDA_medIncome2021.parquet", index=False)
     print(unemployment_all_data.head(1))
-    print(population2021_data.head(1))
+    print(population2010_data.head(1))
     print(poverty_data.head(1))
     print(med_income_data.head(1))
+    #population2010_data.to_parquet("data/population2010_data.parquet", index=False)
     print("save unemployment_all_data, population2021_data, poverty_data, med_income_data into data folder")
 
     return True
