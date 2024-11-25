@@ -5,7 +5,12 @@ from bs4 import BeautifulSoup
 import requests
 import os
 import dotenv
-
+import pandas as pd
+import os
+from scipy.optimize import curve_fit
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
 
 # Importing FIPS
 url = "https://en.wikipedia.org/wiki/List_of_United_States_FIPS_codes_by_county"
@@ -108,9 +113,6 @@ epu_df2.reset_index(drop=True, inplace=True)
 print(epu_df2.head(30))
 
 
-import pandas as pd
-import os
-
 # Define the path to the Parquet file in the data folder
 file_path = os.path.join("data", "USDA_population2021.parquet")
 
@@ -166,9 +168,6 @@ fips_pop["pop_merge_indicator"].value_counts()
 # print(f"By computing the total missing values in fips_pop after the merge the following is obtained:{missing_values}")
 
 
-import pandas as pd
-import os
-
 # Define the path to the Parquet file in the data folder
 file_path = os.path.join("data", "USDA_poverty2021.parquet")
 
@@ -206,8 +205,6 @@ fpp["County"] = fpp["County"].str.upper().str.replace(" COUNTY", "", regex=False
 fpp.head(20)
 
 
-# Importing Median Income Data
-# Importing Poverty Data
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 url_4 = "https://raw.githubusercontent.com/MIDS-at-Duke/opioids-2024-data-queens-king/main/data/USDA_medIncome2021.parquet"
 headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
@@ -226,12 +223,7 @@ minc = minc.rename(
     }
 )
 
-# pov["FIPS"] = pov["FIPS"].apply(lambda x: str(x).zfill(5))
-# pov = pov.rename(columns={"FIPS": "County_FIPS"})
-# pov = pov[["County_FIPS", "All people in poverty (2021) Percent"]]
-# pov = pov.rename(
-#     columns={"All people in poverty (2021) Percent": "pov_poverty_rate_percent"}
-# )
+
 minc.head(5)
 
 
@@ -337,10 +329,6 @@ fpp_opioid["FIPS|YEAR"] = (
 )
 fpp_opioid = fpp_opioid[fpp_opioid["opioid_YEAR"].isin(des_yr)]
 
-
-import pandas as pd
-import os
-
 # Define the path to the Parquet file in the data folder
 file_path = os.path.join("data", "mortality_data.parquet")
 
@@ -427,11 +415,6 @@ summary_tb["%_missing_mortality"] = (
 print(summary_tb)
 
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-from scipy.optimize import curve_fit
-
 # Step 1: Clean population data and ensure numeric
 if "pop_Population" in merged_dataset.columns:
     merged_dataset["pop_Population"] = (
@@ -512,14 +495,6 @@ plt.tick_params(colors="#262626", labelsize=12)
 plt.tight_layout()
 plt.show()
 
-
-# Required imports
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-
 # Filter dataset for overdose counties and missing mortality match
 overdose_counties = merged_dataset[
     merged_dataset["mort_merge_indicator"] == "both"
@@ -544,7 +519,7 @@ no_mort_match["pop_Population"] = (
 overdose_counties["log_population"] = np.log(overdose_counties["pop_Population"])
 no_mort_match["log_population"] = np.log(no_mort_match["pop_Population"])
 
-# Ensure `log_population` is not NaN
+# Ensure log_population is not NaN
 no_mort_match = no_mort_match[no_mort_match["log_population"].notna()]
 
 # Step 2: Define features and target for the model
@@ -568,7 +543,7 @@ r2 = r2_score(y_test, y_pred)
 print(f"Mean Squared Error (MSE): {mse:.2f}")
 print(f"R² Score: {r2:.3f}")
 
-# Predict overdose deaths for the `no_mort_match` dataset
+# Predict overdose deaths for the no_mort_match dataset
 no_mort_match["predicted_overdose_deaths"] = rf_model.predict(
     no_mort_match[["log_population"]]
 )
@@ -622,11 +597,6 @@ final_dataset["pop_log_population"] = np.log(
     final_dataset["pop_Population"].astype("int")
 )
 final_dataset.head(5)
-
-
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.optimize import curve_fit
 
 
 # Define an exponential function for better fitting
@@ -700,10 +670,6 @@ plt.tick_params(colors="#262626", labelsize=12)
 plt.tight_layout()
 plt.show()
 
-
-import matplotlib.pyplot as plt
-import numpy as np
-
 # Grouping populations into bins for the histogram
 pop_data = np.array(final_dataset["pop_log_population"])
 bin_edges = np.histogram_bin_edges(pop_data, bins="auto")
@@ -770,3 +736,5 @@ plt.show()
 
 
 final_dataset = final_dataset[final_dataset["pop_log_population"] >= 8.5]
+
+print(final_dataset.head(5))
