@@ -77,6 +77,7 @@ def get_USDA_data():
     print(population2010_data.head(1))
     print(poverty_data.head(1))
     print(med_income_data.head(1))
+    #population2010_data.to_parquet("data/population2010_data.parquet", index=False)
     print("save unemployment_all_data, population2021_data, poverty_data, med_income_data into data folder")
 
     return True
