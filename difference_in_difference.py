@@ -66,15 +66,15 @@ def add_predictions(data, y_var):
 def create_did_charts(
     final_dataset,
     treated_state,
+    treated_state_full_name,
     control_states,
     start_year,
     end_year,
     policy_year_start,
     policy_year_end,
-    specific_lines,
     save_as,
 ):
-    """Generate DID chart with splines, control states, and extra lines."""
+    """Generate DID charts for treated state vs control states."""
     treated_data = prepare_data(final_dataset, [treated_state], start_year, end_year)
     control_data = prepare_data(final_dataset, control_states, start_year, end_year)
 
@@ -99,7 +99,7 @@ def create_did_charts(
         treated_data["opioid_YEAR"],
         treated_data["morphine_per_capita_predicted"],
         color=duke_colors["blue"],
-        label=f"{treated_state} Trendline",
+        label=f"{treated_state_full_name} Trendline",
         linewidth=2,
     )
     ax1.fill_between(
@@ -124,15 +124,20 @@ def create_did_charts(
         alpha=0.3,
     )
     ax1 = add_policy_year_break(ax1, policy_year_start, policy_year_end)
-    for line_year in specific_lines:
-        ax1.axvline(
-            x=line_year, color=duke_colors["gray"], linestyle="--", linewidth=1.5
-        )
+    ax1.axvline(
+        x=policy_year_end,
+        color=duke_colors["gray"],
+        linestyle="--",
+        linewidth=1.5,
+        label="Policy Implementation",
+    )
     ax1.set_title(
-        f"Opioid (MME) per Capita: {treated_state} vs Control States",
+        f"Opioid (MME) per Capita: {treated_state_full_name} vs Control States",
         fontsize=12,
         weight="bold",
     )
+    ax1.set_xlabel("Year", fontsize=10)
+    ax1.set_ylabel("Opioid (MME) per Capita", fontsize=10)
     ax1.legend(loc="upper right", fontsize=8, framealpha=0.8)
 
     # Chart 2: Overdose deaths per capita
@@ -141,7 +146,7 @@ def create_did_charts(
         treated_data["opioid_YEAR"],
         treated_data["deaths_per_capita_predicted"],
         color=duke_colors["blue"],
-        label=f"{treated_state}",
+        label=f"{treated_state_full_name} Trendline",
         linewidth=2,
     )
     ax2.fill_between(
@@ -166,15 +171,20 @@ def create_did_charts(
         alpha=0.3,
     )
     ax2 = add_policy_year_break(ax2, policy_year_start, policy_year_end)
-    for line_year in specific_lines:
-        ax2.axvline(
-            x=line_year, color=duke_colors["gray"], linestyle="--", linewidth=1.5
-        )
+    ax2.axvline(
+        x=policy_year_end,
+        color=duke_colors["gray"],
+        linestyle="--",
+        linewidth=1.5,
+        label="Policy Implementation",
+    )
     ax2.set_title(
-        f"Overdose Deaths per Capita: {treated_state} vs Control States",
+        f"Overdose Deaths per Capita: {treated_state_full_name} vs Control States",
         fontsize=12,
         weight="bold",
     )
+    ax2.set_xlabel("Year", fontsize=10)
+    ax2.set_ylabel("Overdose Deaths per Capita", fontsize=10)
     ax2.legend(loc="upper right", fontsize=8, framealpha=0.8)
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
@@ -190,24 +200,24 @@ def main():
     create_did_charts(
         final_dataset=final_dataset,
         treated_state="FL",
+        treated_state_full_name="Florida",
         control_states=["AL", "OK", "GA"],
         start_year=2007,
         end_year=2013,
         policy_year_start=2009,
         policy_year_end=2010,
-        specific_lines=[2009, 2010],
         save_as="florida_did_charts",
     )
 
     create_did_charts(
         final_dataset=final_dataset,
         treated_state="WA",
+        treated_state_full_name="Washington",
         control_states=["ME", "OR", "CO"],
         start_year=2009,
         end_year=2015,
         policy_year_start=2011,
         policy_year_end=2012,
-        specific_lines=[2011, 2012],
         save_as="washington_did_charts",
     )
 
