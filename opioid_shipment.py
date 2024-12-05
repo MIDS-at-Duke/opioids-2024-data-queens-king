@@ -53,7 +53,7 @@ def validate_counties(df, state, max_counties):
 def main():
     # Settings and configurations
     warnings.filterwarnings("ignore", category=FutureWarning)
-    file_path = "~/Desktop/arcos_all_washpost.zip"
+    file_path = "~/Desktop/arcos_all.zip"
     chunk_size = 100000
     states_to_keep = ["FL", "WA", "OR", "GA", "OK", "AL", "CO", "ME"]
     columns_to_keep = [
