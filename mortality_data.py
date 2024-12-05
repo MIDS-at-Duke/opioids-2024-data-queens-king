@@ -40,15 +40,10 @@ def clean_and_standardize_data(raw_data):
         }
     )
 
-    # Filter for drug-related causes of interest
-    drug_related_causes = [
-        "Drug poisonings (overdose) Unintentional (X40-X44)",
-        "Drug poisonings (overdose) Suicide (X60-X64)",
-        "Drug poisonings (overdose) Undetermined (Y10-Y14)",
-        "Drug poisonings (overdose) Homicide (X85)",
-        "All other drug-induced causes",
+    # Filter for main cause: unintentional drug overdose
+    filtered_data = cleaned_data[
+        cleaned_data["cause"] == "Drug poisonings (overdose) Unintentional (X40-X44)"
     ]
-    filtered_data = cleaned_data[cleaned_data["cause"].isin(drug_related_causes)]
 
     # Extract state information from county names
     filtered_data["state"] = filtered_data["county"].str.split(", ").str[-1]
