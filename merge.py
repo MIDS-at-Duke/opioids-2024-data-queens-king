@@ -658,56 +658,61 @@ plt.tick_params(colors="#262626", labelsize=12)
 plt.tight_layout()
 plt.show()
 
-
 # Grouping populations into bins for the histogram
-pop_data = np.array(final_dataset["pop_log_population"])
-bin_edges = np.histogram_bin_edges(pop_data, bins="auto")
+pop_data = np.array(final_dataset["pop_Population"])
 
-# Define the threshold for splitting the population
-threshold = 8.5
+# Define log-transformed bins for uniform widths
+log_bin_edges = np.linspace(np.log10(pop_data.min()), np.log10(pop_data.max()), 15)
 
-# Separate the bins to avoid overlap
-below_threshold_bins = bin_edges[bin_edges <= threshold]
-above_threshold_bins = bin_edges[bin_edges > threshold]
-below_threshold_bins = np.append(
-    below_threshold_bins, threshold
-)  # Add threshold as the upper limit
-above_threshold_bins = np.insert(
-    above_threshold_bins, 0, threshold
-)  # Add threshold as the lower limit
+# Map bin edges back to the original population scale for x-axis labels
+bin_edges = np.power(10, log_bin_edges)
 
 # Separate below and above threshold
-below_threshold = pop_data[pop_data <= threshold]
-above_threshold = pop_data[pop_data > threshold]
+below_threshold = pop_data[pop_data <= 5000]
+above_threshold = pop_data[pop_data > 5000]
 
 # Plot the histogram
 plt.figure(figsize=(14, 9))
 plt.hist(
     below_threshold,
-    bins=below_threshold_bins,
+    bins=bin_edges[bin_edges <= 5000],  # Bins below 5,000
     color="#E89023",
     edgecolor="#FFFFFF",
-    label="(Low Population Counties)",
+    label="Low Population Counties",
     alpha=0.8,
 )
 plt.hist(
     above_threshold,
-    bins=above_threshold_bins,
+    bins=bin_edges[bin_edges > 5000],  # Bins above 5,000
     color="#085587",
     edgecolor="#FFFFFF",
-    label="Higher_population Counties",
+    label="High Population Counties",
     alpha=0.8,
+)
+
+# Highlight the threshold for population cutoff (5,000)
+plt.axvline(
+    x=5000, color="red", linestyle="--", linewidth=2, label="Population = 5,000"
+)
+
+# Adjust x-axis to show actual population values
+plt.gca().set_xscale("log")
+plt.xticks(
+    [1000, 5000, 10000, 50000, 100000, 500000, 1000000],
+    ["1K", "5K", "10K", "50K", "100K", "500K", "1M"],
+    fontsize=12,
+    color="#262626",
 )
 
 # Styling for a professional look
 plt.gca().set_facecolor("#FFFFFF")  # White background
 plt.title(
-    "Histogram Population (Log-scaled) by Unique Counties",
+    "Histogram of Population by Unique Counties",
     fontsize=20,
     color="#262626",
     weight="bold",
 )
-plt.xlabel("Log(Population)", fontsize=16, color="#262626", weight="bold")
+plt.xlabel("County Population", fontsize=16, color="#262626", weight="bold")
 plt.ylabel("Count of Unique Counties", fontsize=16, color="#262626", weight="bold")
 plt.legend(
     title="Population Groups",
@@ -722,6 +727,7 @@ plt.tick_params(colors="#262626", labelsize=12)
 # Display the updated histogram
 plt.tight_layout()
 plt.show()
+
 
 # AFTER READING THE HISTOGRAM FOR LOG-POP AND UNIQUE COUNTIES WE DETERMINED THE THRESHOLD FOR SMALL COUNTIES BEING 8.5
 
