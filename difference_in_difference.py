@@ -43,12 +43,12 @@ def prepare_data(data, states, start_year, end_year):
         aggregated["total_deaths"] / aggregated["total_population"]
     )
     return aggregated
+    
 
-
-def add_predictions(data, y_var):
+def add_predictions(data, y_var, degree=3, df=4):
     """Fit a spline model and add predictions with confidence intervals."""
     spline_basis = dmatrix(
-        "bs(opioid_YEAR, degree=3, df=4)", data=data, return_type="dataframe"
+        f"bs(opioid_YEAR, degree={degree}, df={df})", data=data, return_type="dataframe"
     )
     model = sm.OLS(
         data[y_var],
