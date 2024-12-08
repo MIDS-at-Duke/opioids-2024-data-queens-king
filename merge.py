@@ -668,14 +668,14 @@ log_bin_edges = np.linspace(np.log10(pop_data.min()), np.log10(pop_data.max()), 
 bin_edges = np.power(10, log_bin_edges)
 
 # Separate below and above threshold
-below_threshold = pop_data[pop_data <= 5000]
-above_threshold = pop_data[pop_data > 5000]
+below_threshold = pop_data[pop_data <= 9000]
+above_threshold = pop_data[pop_data > 9000]
 
 # Plot the histogram
 plt.figure(figsize=(14, 9))
 plt.hist(
     below_threshold,
-    bins=bin_edges[bin_edges <= 5000],  # Bins below 5,000
+    bins=bin_edges[bin_edges <= 9000],  # Bins below 5,000
     color="#E89023",
     edgecolor="#FFFFFF",
     label="Low Population Counties",
@@ -683,7 +683,7 @@ plt.hist(
 )
 plt.hist(
     above_threshold,
-    bins=bin_edges[bin_edges > 5000],  # Bins above 5,000
+    bins=bin_edges[bin_edges > 9000],  # Bins above 5,000
     color="#085587",
     edgecolor="#FFFFFF",
     label="High Population Counties",
@@ -731,7 +731,7 @@ plt.show()
 
 # AFTER READING THE HISTOGRAM FOR LOG-POP AND UNIQUE COUNTIES WE DETERMINED THE THRESHOLD FOR SMALL COUNTIES BEING 8.5
 
-final_dataset = final_dataset[final_dataset["pop_log_population"] >= 8.5]
+final_dataset = final_dataset[final_dataset["pop_log_population"] >= 9.3]
 final_dataset["grams_morphine_per_cap"] = final_dataset[
     "opioid_morphine_equivalent_g"
 ].astype("float") / final_dataset["pop_Population"].astype("int")
