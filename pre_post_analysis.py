@@ -293,6 +293,6 @@ def create_charts_fl_with_gap_and_line():
     plt.show()
 
 
-# Call the updated function
+# Call the  functions 
 create_charts_wa_with_gap_and_line()
 create_charts_fl_with_gap_and_line()
