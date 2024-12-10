@@ -1,4 +1,4 @@
-# IDS720 - Final Project
+# IDS720 - Final Project - Data Queens and King
 ## Estimating the Effectiveness of Opioid Control Policies
 
 This repository contains the analysis and code used for the project "Estimating the Effectiveness of Opioid Control Policies", conducted as part of IDS720: Practical Data Science. The study evaluates the impact of opioid policies in Florida and Washington on opioid prescription rates and overdose mortality using pre-post and difference-in-difference (DiD) methods.
