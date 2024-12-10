@@ -198,12 +198,12 @@ fpp.head(20)
 
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-url_4 = "https://raw.githubusercontent.com/MIDS-at-Duke/opioids-2024-data-queens-king/main/USDA_medIncome2021.parquet"
+url_4 = "https://raw.githubusercontent.com/MIDS-at-Duke/opioids-2024-data-queens-king/main/data/USDA_medIncome2021.parquet"
 headers = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 response = requests.get(url_4, headers=headers)
 with open("USDA_medIncome2021.parquet", "wb") as file:
     file.write(response.content)
-minc = pd.read_parquet("USDA_medIncome2021.parquet")
+minc = pd.read_parquet("data/USDA_medIncome2021.parquet")
 
 
 minc["FIPS_Code"] = minc["FIPS_Code"].apply(lambda x: str(x).zfill(5))

@@ -84,7 +84,7 @@ def save_to_parquet(data, output_path):
 def main():
     """Orchestrate the data loading, cleaning, aggregation, and saving process."""
     # Define input folder and output path
-    folder_path = "~/Desktop/US_VitalStatistics/"
+    folder_path = "./data/US_VitalStatistics/"
     output_path = "data/mortality_data.parquet"
 
     print("Loading data...")
